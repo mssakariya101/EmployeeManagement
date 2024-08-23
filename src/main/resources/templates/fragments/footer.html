@@ -1,0 +1,62 @@
+<footer class="sticky-footer bg-white" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <p>&copy; 2024 Employee Management</p>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="/js/alerts.js"></script>
+    <script>
+        $('#resetPasswordModal').on('hidden.bs.modal', function() {
+            $('#resetPasswordForm')[0].reset();
+        });
+
+         $(document).ready(function() {
+             $('#resetPassword').click(function() {
+                 $('#resetPasswordModal').modal('show');
+             });
+
+             $('#resetPasswordForm').on('submit', function(e) {
+                 e.preventDefault();
+                 // Add AJAX call to reset the password
+                 var username = '[[${session.username}]]';
+                 var currentPassword=$('#currentPassword').val();
+                 var newPassword = $('#newPassword').val();
+                 var confirmPassword = $('#confirmPassword').val();
+                 var csrfToken = $('meta[name="_csrf"]').attr('content');
+                 var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+                 if (newPassword !== confirmPassword) {
+                     swal.fire("Both password does not match","","error");
+                     return;
+                 }
+
+                 const data ={
+                     email:username,
+                     currentPassword:currentPassword,
+                     newPassword:newPassword
+                 };
+
+                 $.ajax({
+                     url: '/reset-password',
+                     type: 'POST',
+                      beforeSend: function (xhr) {
+                        xhr.setRequestHeader(csrfHeader, csrfToken);
+                     },
+                     contentType: 'application/json',
+                     data: JSON.stringify(data),
+                     success: function(response) {
+                        swal.fire(response.message,"","success");
+                         $('#resetPasswordModal').modal('hide');
+                     },
+                     error: function(xhr, status, error) {
+                     swal.fire("Error resetting password. Please try again.","","error");
+                     }
+                 });
+             });
+         });
+    </script>
+</footer>
